@@ -3,16 +3,9 @@ import cors from "cors";
 import morgan from "morgan";
 import pool from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
-import authMiddleware from "./middleware/authMiddleware.js";
+import urlRoutes from "./routes/urlRoutes.js";
 
 const app = express();
-
-app.get("/protected", authMiddleware, (req, res) => {
-  res.json({
-    message: "Protected route",
-    user: req.user
-  });
-});
 
 // middlewares
 app.use(cors());
@@ -24,7 +17,7 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// DB test route
+// DB test
 app.get("/test-db", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
@@ -37,11 +30,8 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
-// auth routes
+// routes
 app.use("/api/auth", authRoutes);
-
-app.get("/protected", (req, res) => {
-  res.send("This is unprotected route");
-});
+app.use("/api/urls", urlRoutes);
 
 export default app;
