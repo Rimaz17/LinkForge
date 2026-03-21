@@ -4,6 +4,7 @@ import morgan from "morgan";
 import pool from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import urlRoutes from "./routes/urlRoutes.js";
+import { redirectUrl } from "./controllers/urlController.js";
 
 const app = express();
 
@@ -30,8 +31,11 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
-// routes
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/urls", urlRoutes);
+
+
+app.get("/:shortCode", redirectUrl);
 
 export default app;
