@@ -3,7 +3,12 @@ import Navbar from "../components/Navbar.jsx";
 import UrlForm from "../components/UrlForm.jsx";
 import UrlList from "../components/UrlList.jsx";
 import { getApiErrorMessage } from "../services/api.js";
-import { createUserShortUrl, fetchUserUrls } from "../services/urlService.js";
+import {
+  createUserShortUrl,
+  fetchUserUrls,
+  getLocalUrls,
+  saveLocalUrl
+} from "../services/urlService.js";
 
 function DashboardPage() {
   const [createdUrl, setCreatedUrl] = useState(null);
@@ -13,9 +18,11 @@ function DashboardPage() {
   const [urls, setUrls] = useState([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState("");
+  const [listNotice, setListNotice] = useState("");
 
   const loadUrls = useCallback(async () => {
     setListError("");
+    setListNotice("");
     setListLoading(true);
 
     try {
@@ -24,7 +31,9 @@ function DashboardPage() {
     } catch (err) {
       const apiMessage = getApiErrorMessage(err, "Failed to load URLs");
       if (err?.response?.status === 404) {
-        setListError("GET /api/urls is not available in backend yet.");
+        const localUrls = getLocalUrls();
+        setUrls(localUrls);
+        setListNotice("Backend GET /api/urls is unavailable. Showing locally saved URLs.");
       } else {
         setListError(apiMessage);
       }
@@ -44,6 +53,7 @@ function DashboardPage() {
     try {
       const created = await createUserShortUrl(payload);
       setCreatedUrl(created);
+      saveLocalUrl(created);
       setUrls((current) => [created, ...current]);
     } catch (err) {
       setCreateError(getApiErrorMessage(err, "Failed to create short URL"));
@@ -56,6 +66,13 @@ function DashboardPage() {
     <main className="min-h-screen px-4 py-6 md:px-8">
       <div className="mx-auto w-full max-w-5xl">
         <Navbar />
+
+        <section className="mb-6 rounded-2xl border border-sky-100 bg-gradient-to-r from-sky-50 to-emerald-50 p-5 shadow-sm">
+          <h2 className="text-xl font-semibold text-slate-900">Shorten and Track</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Create short links instantly and track usage from one dashboard.
+          </p>
+        </section>
 
         <div className="grid gap-6 md:grid-cols-5">
           <div className="md:col-span-2">
@@ -81,7 +98,13 @@ function DashboardPage() {
           </div>
 
           <div className="md:col-span-3">
-            <UrlList urls={urls} loading={listLoading} error={listError} onRetry={loadUrls} />
+            <UrlList
+              urls={urls}
+              loading={listLoading}
+              error={listError}
+              notice={listNotice}
+              onRetry={loadUrls}
+            />
           </div>
         </div>
       </div>
