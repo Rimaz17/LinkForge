@@ -249,22 +249,6 @@ Behavior:
 - Returns `404` if code does not exist
 - Returns `410` if link is expired
 
-## Screenshots
-
-Add screenshots to highlight product flow:
-
-- `docs/screenshots/login.png` - Login page
-- `docs/screenshots/register.png` - Register page
-- `docs/screenshots/dashboard.png` - Dashboard and URL creation
-- `docs/screenshots/redirect-flow.png` - Redirect/click tracking demo
-
-Markdown placeholders:
-
-```md
-![Login](docs/screenshots/login.png)
-![Register](docs/screenshots/register.png)
-![Dashboard](docs/screenshots/dashboard.png)
-![Redirect Flow](docs/screenshots/redirect-flow.png)
 ```
 
 ## Folder Structure
@@ -335,7 +319,3 @@ Recommended standards:
 ## License
 
 This project is licensed under the ISC License.
-
----
-
-If you are using this project in a portfolio, position it as an end-to-end link platform prototype focused on performance-aware backend design and practical full-stack delivery.
