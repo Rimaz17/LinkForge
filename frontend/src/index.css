@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+}
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-slate-50 text-slate-900;
+    background-image:
+      radial-gradient(circle at 8% 12%, rgba(14, 165, 233, 0.16), transparent 35%),
+      radial-gradient(circle at 84% 14%, rgba(16, 185, 129, 0.12), transparent 35%),
+      linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+}
