@@ -1,5 +1,6 @@
 import pool from "../config/db.js";
 import { nanoid } from "nanoid";
+import redisClient from "../config/redis.js";
 
 // CREATE SHORT URL
 export const createShortUrl = async (req, res) => {
@@ -27,11 +28,28 @@ export const createShortUrl = async (req, res) => {
   }
 };
 
-// REDIRECT
+// REDIRECT WITH CACHE
 export const redirectUrl = async (req, res) => {
   try {
     const { shortCode } = req.params;
 
+    //  check Redis
+    const cachedUrl = await redisClient.get(shortCode);
+
+    if (cachedUrl) {
+      console.log("Cache HIT");
+
+      await pool.query(
+        "UPDATE urls SET click_count = click_count + 1 WHERE short_code = $1",
+        [shortCode]
+      );
+
+      return res.redirect(cachedUrl);
+    }
+
+    console.log("Cache MISS");
+
+    // fetch from DB
     const result = await pool.query(
       "SELECT * FROM urls WHERE short_code = $1",
       [shortCode]
@@ -43,12 +61,17 @@ export const redirectUrl = async (req, res) => {
       return res.status(404).json({ error: "URL not found" });
     }
 
-    // check expiration
+    // expiration check
     if (url.expires_at && new Date(url.expires_at) < new Date()) {
       return res.status(410).json({ error: "Link expired" });
     }
 
-    // increment click count
+    //  store in Redis
+    await redisClient.set(shortCode, url.original_url, {
+      EX: 3600
+    });
+
+    //  increment click count
     await pool.query(
       "UPDATE urls SET click_count = click_count + 1 WHERE id = $1",
       [url.id]
