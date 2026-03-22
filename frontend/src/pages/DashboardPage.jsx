@@ -7,7 +7,9 @@ import {
   createUserShortUrl,
   fetchUserUrls,
   getLocalUrls,
-  saveLocalUrl
+  isUrlListUnavailable,
+  saveLocalUrl,
+  setUrlListUnavailable
 } from "../services/urlService.js";
 
 function DashboardPage() {
@@ -18,22 +20,27 @@ function DashboardPage() {
   const [urls, setUrls] = useState([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState("");
-  const [listNotice, setListNotice] = useState("");
 
   const loadUrls = useCallback(async () => {
     setListError("");
-    setListNotice("");
     setListLoading(true);
+
+    if (isUrlListUnavailable()) {
+      setUrls(getLocalUrls());
+      setListLoading(false);
+      return;
+    }
 
     try {
       const data = await fetchUserUrls();
+      setUrlListUnavailable(false);
       setUrls(Array.isArray(data) ? data : []);
     } catch (err) {
       const apiMessage = getApiErrorMessage(err, "Failed to load URLs");
       if (err?.response?.status === 404) {
+        setUrlListUnavailable(true);
         const localUrls = getLocalUrls();
         setUrls(localUrls);
-        setListNotice("Backend GET /api/urls is unavailable. Showing locally saved URLs.");
       } else {
         setListError(apiMessage);
       }
@@ -67,10 +74,10 @@ function DashboardPage() {
       <div className="mx-auto w-full max-w-5xl">
         <Navbar />
 
-        <section className="mb-6 rounded-2xl border border-sky-100 bg-gradient-to-r from-sky-50 to-emerald-50 p-5 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-900">Shorten and Track</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Create short links instantly and track usage from one dashboard.
+        <section className="mb-6 rounded-2xl border border-orange-200 bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 p-5 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900">Shorten and Track</h2>
+          <p className="mt-1 text-sm text-slate-700">
+            Create branded-looking short links and manage everything in one place.
           </p>
         </section>
 
@@ -102,7 +109,6 @@ function DashboardPage() {
               urls={urls}
               loading={listLoading}
               error={listError}
-              notice={listNotice}
               onRetry={loadUrls}
             />
           </div>
