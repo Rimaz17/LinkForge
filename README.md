@@ -2,8 +2,6 @@
 
 LinkForge is a full-stack URL management platform built for teams and builders who need more than basic link shortening. It provides authenticated URL creation, expiration controls, click tracking, and Redis-backed redirect acceleration, making it suitable for campaign links, product growth funnels, and internal analytics workflows.
 
-Designed as a portfolio-grade engineering project, LinkForge demonstrates production-oriented backend patterns (retry logic, containerized services, JWT security, cache-assisted reads) with a modern React frontend.
-
 ## Why LinkForge
 
 Traditional short links solve only one problem: URL length. LinkForge focuses on real operational needs:
