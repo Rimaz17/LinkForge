@@ -7,9 +7,7 @@ import {
   createUserShortUrl,
   fetchUserUrls,
   getLocalUrls,
-  isUrlListUnavailable,
-  saveLocalUrl,
-  setUrlListUnavailable
+  saveLocalUrl
 } from "../services/urlService.js";
 
 function DashboardPage() {
@@ -25,20 +23,12 @@ function DashboardPage() {
     setListError("");
     setListLoading(true);
 
-    if (isUrlListUnavailable()) {
-      setUrls(getLocalUrls());
-      setListLoading(false);
-      return;
-    }
-
     try {
       const data = await fetchUserUrls();
-      setUrlListUnavailable(false);
       setUrls(Array.isArray(data) ? data : []);
     } catch (err) {
       const apiMessage = getApiErrorMessage(err, "Failed to load URLs");
       if (err?.response?.status === 404) {
-        setUrlListUnavailable(true);
         const localUrls = getLocalUrls();
         setUrls(localUrls);
       } else {
@@ -51,6 +41,12 @@ function DashboardPage() {
 
   useEffect(() => {
     loadUrls();
+
+    const intervalId = setInterval(() => {
+      loadUrls();
+    }, 5000);
+
+    return () => clearInterval(intervalId);
   }, [loadUrls]);
 
   const handleCreate = async (payload) => {
