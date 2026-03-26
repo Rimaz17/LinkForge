@@ -2,6 +2,23 @@ import pool from "../config/db.js";
 import { nanoid } from "nanoid";
 import redisClient from "../config/redis.js";
 
+// LIST URLS FOR AUTHENTICATED USER
+export const getUserUrls = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, original_url, short_code, click_count, expires_at, created_at
+       FROM urls
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // CREATE SHORT URL
 export const createShortUrl = async (req, res) => {
   try {
